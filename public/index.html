@@ -1,109 +1,318 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>동적 환경생물학 퀴즈</title>
+  <title>환경생물학 퀴즈 생성기</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-    h1, h2 { text-align: center; }
-    .section { margin-bottom: 30px; }
-    input[type="text"] { width: calc(100% - 12px); padding: 5px; font-size: 1em; margin-bottom: 10px; }
-    button { padding: 8px 16px; font-size: 1em; margin-right: 10px; }
-    ul { list-style: none; padding: 0; }
-    li { margin-bottom: 5px; }
-    .question { margin-bottom: 15px; }
-    .correct { color: green; margin-left: 10px; }
-    .wrong { color: red; margin-left: 10px; }
-    #result { margin-top: 20px; font-size: 1.2em; text-align: center; }
+    :root {
+      --color-bg: #f8f9fa; --color-card: #fff; --color-primary: #4f46e5;
+      --color-primary-light: #6366f1; --color-text: #374151; --color-border: #e5e7eb;
+      --radius: .5rem; --transition: .2s ease;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:var(--color-bg);color:var(--color-text);padding:2rem;}
+    h1{text-align:center;margin-bottom:1.5rem;color:var(--color-primary);font-weight:800;}
+    .tabs{display:flex;justify-content:center;gap:1rem;margin-bottom:1rem;}
+    .tab-btn{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);
+      padding:.5rem 1rem;cursor:pointer;transition:var(--transition);font-weight:600;}
+    .tab-btn.active,.tab-btn:hover{background:var(--color-primary-light);color:#fff;border-color:var(--color-primary);}
+    .tab-content{display:none;} .tab-content.active{display:block;}
+    .question-card{background:var(--color-card);border:1px solid var(--color-border);
+      border-radius:var(--radius);padding:1rem;margin-bottom:1rem;
+      box-shadow:0 1px 3px rgba(0,0,0,0.1);transition:var(--transition);}
+    .question-card:hover{box-shadow:0 4px 10px rgba(0,0,0,0.15);}
+    input[type="text"],textarea{width:100%;padding:.75rem;border:1px solid var(--color-border);
+      border-radius:var(--radius);transition:border-color var(--transition);font-size:1rem;}
+    input:focus,textarea:focus{outline:none;border-color:var(--color-primary);}
+    button.primary{background:var(--color-primary);color:#fff;padding:.75rem 1.5rem;border:none;
+      border-radius:var(--radius);cursor:pointer;font-weight:600;transition:background var(--transition);}
+    button.primary:hover{background:var(--color-primary-light);}
+    .correct{color:green;margin-left:.5rem;} .wrong{color:red;margin-left:.5rem;}
+    #result{margin-top:1.5rem;text-align:center;font-size:1.2rem;}
+    .hidden{display:none!important;}
+    #quiz-actions{display:flex;justify-content:center;gap:1rem;margin-top:1rem;}
+    /* 버튼 그룹 분리 */
+    #retry-buttons { margin-top:1rem; }
+    #reset-button { margin-top:1rem; }
+    .edit-btn { margin-left:.5rem; font-size:.9rem; }
   </style>
 </head>
 <body>
-  <h1>동적 환경생물학 퀴즈 생성기</h1>
 
-  <div id="editor" class="section">
-    <h2>문제 추가</h2>
-    <input type="text" id="new-question" placeholder="문제를 입력하세요" />
-    <input type="text" id="new-answers" placeholder="정답들을 콤마로 구분하여 입력하세요" />
-    <button onclick="addQuestion()">문제 추가</button>
-    <h3>문제 목록</h3>
-    <ul id="question-list"></ul>
-    <button onclick="startQuiz()" id="start-btn" disabled>퀴즈 시작</button>
+  <h1>환경생물학 퀴즈 생성기</h1>
+
+  <!-- 문제 추가 영역 -->
+  <div id="add-ui">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="single">개별 추가</button>
+      <button class="tab-btn" data-tab="bulk">일괄 추가</button>
+    </div>
+
+    <!-- 개별 추가 -->
+    <section id="single" class="tab-content active">
+      <div class="question-card">
+        <label>문제 입력:</label>
+        <textarea id="single-q" rows="2" placeholder="문제 텍스트"></textarea>
+        <label style="margin-top:.5rem;">정답 입력 (콤마로 구분):</label>
+        <input type="text" id="single-a" placeholder="예) A, B">
+        <button id="add-btn" class="primary" onclick="addSingle()">문항 추가</button>
+      </div>
+    </section>
+
+    <!-- 일괄 추가 -->
+    <section id="bulk" class="tab-content">
+      <div class="question-card">
+        <label>일괄 붙여넣기 (문제 / 정답1,정답2):</label>
+        <textarea id="bulk-input" rows="6" placeholder="예) Q? / A1, A2"></textarea>
+        <button class="primary" onclick="parseBulk()">파싱 & 미리보기</button>
+      </div>
+      <div id="bulk-preview"></div>
+      <button id="bulk-add-btn" class="primary hidden" onclick="addBulk()">일괄 등록</button>
+    </section>
+
+    <!-- 등록된 문항 목록 -->
+    <div id="question-list" class="question-card hidden">
+      <h2>등록된 문항 (<span id="q-count">0</span>개)</h2>
+      <ol id="q-list"></ol>
+    </div>
+
+    <div style="text-align:center;margin:1.5rem 0;">
+      <button id="start-btn" class="primary" onclick="startQuiz()">퀴즈 시작</button>
+    </div>
   </div>
 
-  <div id="quiz" class="section" style="display:none;">
-    <h2>퀴즈 풀기</h2>
-    <form id="quiz-form" onsubmit="return false;"></form>
-    <button onclick="checkAnswers()">제출</button>
-    <button onclick="resetApp()">처음으로</button>
-    <div id="result"></div>
+  <!-- 퀴즈 풀이 폼 -->
+  <form id="quiz-form" class="hidden"></form>
+
+  <!-- 채점 / 재풀이 버튼 -->
+  <div id="quiz-actions" class="hidden">
+    <button id="submit-btn" class="primary" onclick="checkAnswers()">제출</button>
+
+    <div id="retry-buttons">
+      <button class="primary" onclick="retryWrong()">틀린문제만 다시 풀기</button>
+      <button class="primary" onclick="retryAll()">전체 다시 풀기</button>
+    </div>
+
+    <div id="reset-button">
+      <button class="primary" onclick="resetAll()">전체 초기화</button>
+    </div>
   </div>
+
+  <div id="result"></div>
 
   <script>
-    const questions = [];
-    const normalize = s => s.replace(/\s+/g, '').toLowerCase();
-
-    function addQuestion() {
-      const qInput = document.getElementById('new-question');
-      const aInput = document.getElementById('new-answers');
-      const qText = qInput.value.trim();
-      const answers = aInput.value.split(',').map(s => s.trim()).filter(s => s);
-      if (!qText || answers.length === 0) {
-        alert('문제와 하나 이상의 정답을 입력하세요.');
-        return;
+    // 탭 전환
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+  
+    // 배열 셔플
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
       }
-      questions.push({ q: qText, a: answers });
-      qInput.value = '';
-      aInput.value = '';
-      renderList();
+      return a;
     }
-
-    function renderList() {
-      const list = document.getElementById('question-list');
-      list.innerHTML = '';
+  
+    // 답안 키 파싱 (AND/OR 구분)
+    function parseAnswers(raw) {
+      raw = raw.trim();
+      if (raw.includes('|')) {
+        return {
+          answers: raw.split('|').map(s => s.trim()),
+          operator: 'OR'
+        };
+      } else {
+        return {
+          answers: raw.split(',').map(s => s.trim()),
+          operator: 'AND'
+        };
+      }
+    }
+  
+    let questions = [];      // 전체 문항 리스트
+    let currentQs = [];      // 퀴즈 시작 시 사용할 순서 리스트
+    let editingIndex = null; // 편집 중인 문항 인덱스
+  
+    // 문항 목록 갱신
+    function updateQuestionList() {
+      const div = document.getElementById('question-list');
+      if (!questions.length) return div.classList.add('hidden');
+      div.classList.remove('hidden');
+      document.getElementById('q-count').textContent = questions.length;
+      const ol = document.getElementById('q-list');
+      ol.innerHTML = '';
       questions.forEach((item, idx) => {
         const li = document.createElement('li');
-        li.textContent = `${idx+1}. ${item.q} [정답: ${item.a.join('/')}]`;
-        list.appendChild(li);
+        li.textContent = item.q;
+        const btn = document.createElement('button');
+        btn.textContent = '수정';
+        btn.className = 'edit-btn';
+        btn.addEventListener('click', () => startEdit(idx));
+        li.appendChild(btn);
+        ol.appendChild(li);
       });
-      document.getElementById('start-btn').disabled = questions.length === 0;
     }
-
+  
+    // 문항 편집 모드로 로드
+    function startEdit(idx) {
+      const item = questions[idx];
+      document.getElementById('single-q').value = item.q;
+      document.getElementById('single-a').value = item.a.join(', ');
+      editingIndex = idx;
+      document.getElementById('add-btn').textContent = '수정 저장';
+      document.querySelector('[data-tab="single"]').click();
+    }
+  
+    // 개별 추가 혹은 수정 저장
+    function addSingle() {
+      const q = document.getElementById('single-q').value.trim();
+      const raw = document.getElementById('single-a').value;
+      if (!q || !raw.trim()) return alert('문제와 정답을 모두 입력하세요.');
+      const { answers, operator } = parseAnswers(raw);
+      if (editingIndex !== null) {
+        questions[editingIndex] = { q, a: answers, op: operator };
+        editingIndex = null;
+        document.getElementById('add-btn').textContent = '문항 추가';
+      } else {
+        questions.push({ q, a: answers, op: operator });
+      }
+      document.getElementById('single-q').value = '';
+      document.getElementById('single-a').value = '';
+      updateQuestionList();
+    }
+  
+    // 일괄 붙여넣기 파싱
+    function parseBulk() {
+      const lines = document.getElementById('bulk-input').value.split('\n');
+      const prev = document.getElementById('bulk-preview');
+      prev.innerHTML = '';
+      const tmp = [];
+      lines.forEach((line, i) => {
+        const [left, right] = line.split('/');
+        if (!left || !right) {
+          prev.innerHTML += `<div class="question-card wrong">라인 ${i+1}: 파싱 실패</div>`;
+        } else {
+          const q = left.replace(/^\d+\)?\s*/, '').trim();
+          const { answers, operator } = parseAnswers(right);
+          tmp.push({ q, a: answers, op: operator });
+          prev.innerHTML += `<div class="question-card correct">라인 ${i+1}: ${q} → [${answers.join(', ')}]</div>`;
+        }
+      });
+      if (tmp.length) {
+        window._bulkTmp = tmp;
+        document.getElementById('bulk-add-btn').classList.remove('hidden');
+      }
+    }
+  
+    // 일괄 등록
+    function addBulk() {
+      questions = questions.concat(window._bulkTmp || []);
+      document.getElementById('bulk-input').value = '';
+      document.getElementById('bulk-preview').innerHTML = '';
+      document.getElementById('bulk-add-btn').classList.add('hidden');
+      updateQuestionList();
+    }
+  
+    // 퀴즈 시작
     function startQuiz() {
-      document.getElementById('editor').style.display = 'none';
-      const quizDiv = document.getElementById('quiz');
+      if (!questions.length) return alert('먼저 문항을 추가하세요.');
+      document.getElementById('add-ui').classList.add('hidden');
+      document.getElementById('question-list').classList.add('hidden');
+      currentQs = shuffle(questions);
+      renderQuiz();
+    }
+  
+    // 퀴즈 렌더링
+    function renderQuiz() {
       const form = document.getElementById('quiz-form');
       form.innerHTML = '';
-      questions.forEach((item, idx) => {
-        const div = document.createElement('div');
-        div.className = 'question';
-        div.innerHTML = `
-          <label>${idx+1}. ${item.q}</label><br>
-          <input type="text" id="answer${idx}"><span id="feedback${idx}"></span>
+      currentQs.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+          <label>${i+1}. ${item.q}</label><br>
+          <input type="text" id="ans${i}" placeholder="답안 입력">
+          <span id="fb${i}"></span>
         `;
-        form.appendChild(div);
+        form.appendChild(card);
       });
-      quizDiv.style.display = 'block';
+      form.classList.remove('hidden');
+      document.getElementById('quiz-actions').classList.remove('hidden');
     }
-
+  
+    // 문자열 정규화
+    function normalize(s) {
+      return s.replace(/\s+/g, '').toLowerCase();
+    }
+  
+    // 채점
     function checkAnswers() {
       let score = 0;
-      questions.forEach((item, idx) => {
-        const user = document.getElementById(`answer${idx}`).value.trim();
-        const fb = document.getElementById(`feedback${idx}`);
-        const ok = item.a.some(ans => normalize(ans) === normalize(user));
+      currentQs.forEach((item, i) => {
+        const userRaw = document.getElementById(`ans${i}`).value.trim();
+        const userList = userRaw.split(',').map(s => normalize(s));
+        const fb = document.getElementById(`fb${i}`);
+        let ok;
+        if (item.op === 'OR') {
+          ok = item.a.some(ans => userList.includes(normalize(ans)));
+        } else {
+          ok = item.a.every(ans => userList.includes(normalize(ans)));
+        }
         if (ok) {
           fb.textContent = ' 정답입니다!'; fb.className = 'correct'; score++;
         } else {
-          fb.textContent = ` 오답. 정답: ${item.a[0]}`; fb.className = 'wrong';
+          fb.textContent = ` 오답. 정답: ${item.a.join(', ')}`; fb.className = 'wrong';
         }
       });
-      document.getElementById('result').innerHTML = `<h2>총 ${questions.length}문제 중 ${score}문제 정답 (${(score/questions.length*100).toFixed(1)}%)</h2>`;
+      document.getElementById('result').innerHTML =
+        `<h2>총 ${currentQs.length}문제 중 ${score}문제 정답 (${(score/currentQs.length*100).toFixed(1)}%)</h2>`;
     }
-
-    function resetApp() {
-      location.reload();
+  
+    // 전체 초기화
+    function resetAll() {
+      questions = []; currentQs = []; editingIndex = null;
+      updateQuestionList();
+      document.getElementById('bulk-input').value = '';
+      document.getElementById('bulk-preview').innerHTML = '';
+      document.getElementById('bulk-add-btn').classList.add('hidden');
+      document.getElementById('add-ui').classList.remove('hidden');
+      document.getElementById('quiz-form').classList.add('hidden');
+      document.getElementById('quiz-actions').classList.add('hidden');
+      document.getElementById('result').innerHTML = '';
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i===0));
+      document.querySelectorAll('.tab-content').forEach((sec, i) => sec.classList.toggle('active', i===0));
+    }
+  
+    // 전체 다시 풀기
+    function retryAll() {
+      document.getElementById('result').innerHTML = '';
+      currentQs = shuffle(questions);
+      renderQuiz();
+    }
+  
+    // 틀린 문제만 다시 풀기
+    function retryWrong() {
+      const wrongs = [];
+      currentQs.forEach((item, i) => {
+        const fb = document.getElementById(`fb${i}`);
+        if (fb && fb.classList.contains('wrong')) wrongs.push(item);
+      });
+      if (!wrongs.length) return alert('틀린 문제가 없습니다.');
+      document.getElementById('result').innerHTML = '';
+      currentQs = shuffle(wrongs);
+      renderQuiz();
     }
   </script>
+  
 </body>
 </html>
