@@ -128,6 +128,7 @@
       </div>
     </div>
     <div style="text-align:center; margin-top:1rem;">
+      <button class="primary" onclick="resetEdit()">초기화</button>
       <button class="primary" id="start-btn" onclick="startQuiz()">문제 풀기</button>
     </div>
   </div>
@@ -166,8 +167,7 @@
   <ol style="padding-left:1.2rem; list-style:decimal;">
     <li>
       <strong>문제 편집 화면</strong>에서  
-      <code>문제 텍스트 / 답1 / 답2 / 답3</code> 를
-      엔터로 구분하여 입력하세요.  <br>
+      <code>문제 텍스트 / 답1 / 답2 / 답3</code> 를 엔터로 구분하여 입력하세요.  <br>
       복수정답은 <code>,</code>로 구분합니다.
       <br>
 
@@ -240,6 +240,21 @@
     }
     return parts.join(" / ");
   }).join("\n");
+}
+function resetEdit() {
+  // 1) 질문 배열 초기화
+  questions = [{ q: "", a: [[], [], []] }];
+
+  // 2) 왼쪽 textarea, 오른쪽 테이블 모두 비우기
+  updateTextarea();
+  updateTable();
+
+  // 3) (만약 퀴즈 화면이 떠 있다면) 편집 화면으로 복귀
+  document.getElementById("solve-screen").classList.add("hidden");
+  document.getElementById("edit-screen").classList.remove("hidden");
+
+  // 4) 결과 영역 초기화
+  document.getElementById("result").textContent = "";
 }
 
   // 3) 테이블 렌더 + manual-break 클래스 추가
@@ -355,10 +370,18 @@
     updateTable();
   });
 
-  // 초기 렌더
-  updateTable();
-  updateTextarea();
+  const exampleProblems = `대한민국의 수도는? / 서울, seoul
+  광합성 산물은 ___ 과 ___ 이다. / 포도당, 영양분 / 산소, O2
+  초기화하고 문제를 입력하세요!!!
+  `;
 
+    // textarea와 questions 배열에 예시를 반영
+    input.value = exampleProblems;
+    questions = parseInput(input.value);
+
+    // 초기 렌더
+    updateTable();
+    updateTextarea();
   // --- 아래부터 기존 startQuiz / grade / retryAll / retryWrong / goEdit ---
 
   function startQuiz() {
