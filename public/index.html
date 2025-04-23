@@ -108,6 +108,7 @@
     line-height: 1.6em;
   }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 </head>
 <body>
   <h1>족보 기반 퀴즈 생성기</h1>
@@ -202,6 +203,7 @@
  
 <script>
   // shuffle 함수 (이미 정의돼 있으면 생략)
+  src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -383,32 +385,55 @@ function resetEdit() {
 
     // 1) 공유 링크 생성 & 클립보드 복사 함수
     function updateShareLink() {
-    const shareUrl = `${location.origin}${location.pathname}#${encodeURIComponent(input.value)}`;
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => alert("링크가 복사되었습니다"))
-      .catch(() => alert("복사에 실패했습니다"));
+    const compressed = LZString.compressToEncodedURIComponent(input.value);
+    const shareUrl = `${location.origin}${location.pathname}#LZ:${compressed}`;
+    navigator.clipboard.writeText(shareUrl).then(
+      () => alert("링크가 복사되었습니다")
+    );
+  }
+  window.addEventListener("DOMContentLoaded", () => {
+  // 1) 해시 문자열 가져오기
+  const rawHash = location.hash.slice(1);  // 맨 앞 '#' 제거
+  let text;
+
+  // 2) LZ-String 압축된 경우 판단
+  if (rawHash.startsWith("LZ:")) {
+    const compressed = rawHash.slice(3);
+    text = LZString.decompressFromEncodedURIComponent(compressed);
+    if (text === null) {
+      console.error("압축 해제 실패:", compressed);
+      text = "";
+    }
+  }
+  // 3) 일반 URI 인코딩된 경우
+  else if (rawHash.length > 0) {
+    try {
+      text = decodeURIComponent(rawHash);
+    } catch (e) {
+      console.error("디코딩 실패:", rawHash, e);
+      text = "";
+    }
   }
 
-  window.addEventListener("DOMContentLoaded", () => {
-    // 1) 해시 로드 or 예시문 로드
-    const hash = location.hash.slice(1);
-    if (hash) {
-      const decoded = decodeURIComponent(hash);
-      input.value = decoded;
-      questions = parseInput(decoded);
-    } else {
-      input.value = exampleProblems;
-      questions = parseInput(exampleProblems);
-    }
+  // 4) textarea 및 내부 데이터 세팅
+  if (text) {
+    input.value = text;
+    questions = parseInput(text);
+  } else {
+    // 해시가 없거나 복원 실패 시 예시 문제 로드
+    input.value = exampleProblems;
+    questions = parseInput(exampleProblems);
+  }
 
-    // 2) 테이블과 textarea 동기화
-    updateTable();
-    updateTextarea();
+  // 5) 뷰(테이블 + textarea) 동기화
+  updateTable();
+  updateTextarea();
 
-    // 3) 공유 버튼 이벤트 바인딩
-    document.getElementById("share-btn")
-      .addEventListener("click", updateShareLink);
-  });
+  // 6) 공유 버튼 이벤트 바인딩
+  document.getElementById("share-btn")
+    .addEventListener("click", updateShareLink);
+});
+
   // --- 아래부터 기존 startQuiz / grade / retryAll / retryWrong / goEdit ---
 
   function startQuiz() {
