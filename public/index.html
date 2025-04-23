@@ -130,6 +130,7 @@
     <div style="text-align:center; margin-top:1rem;">
       <button class="primary" onclick="resetEdit()">초기화</button>
       <button class="primary" id="start-btn" onclick="startQuiz()">문제 풀기</button>
+      <button class="primary" id="share-btn">문제 공유</button>
     </div>
   </div>
 
@@ -376,12 +377,38 @@ function resetEdit() {
   `;
 
     // textarea와 questions 배열에 예시를 반영
-    input.value = exampleProblems;
-    questions = parseInput(input.value);
+    //input.value = exampleProblems;
+    //questions = parseInput(input.value);
 
-    // 초기 렌더
+
+    // 1) 공유 링크 생성 & 클립보드 복사 함수
+    function updateShareLink() {
+    const shareUrl = `${location.origin}${location.pathname}#${encodeURIComponent(input.value)}`;
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => alert("링크가 복사되었습니다"))
+      .catch(() => alert("복사에 실패했습니다"));
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    // 1) 해시 로드 or 예시문 로드
+    const hash = location.hash.slice(1);
+    if (hash) {
+      const decoded = decodeURIComponent(hash);
+      input.value = decoded;
+      questions = parseInput(decoded);
+    } else {
+      input.value = exampleProblems;
+      questions = parseInput(exampleProblems);
+    }
+
+    // 2) 테이블과 textarea 동기화
     updateTable();
     updateTextarea();
+
+    // 3) 공유 버튼 이벤트 바인딩
+    document.getElementById("share-btn")
+      .addEventListener("click", updateShareLink);
+  });
   // --- 아래부터 기존 startQuiz / grade / retryAll / retryWrong / goEdit ---
 
   function startQuiz() {
@@ -477,6 +504,10 @@ function resetEdit() {
     document.getElementById("solve-screen").classList.add("hidden");
     document.getElementById("edit-screen").classList.remove("hidden");
   }
+
+  
+
+
 </script>
 
 </body>
