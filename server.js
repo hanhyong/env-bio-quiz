@@ -6,7 +6,7 @@ const path = require('path');
 // 포트 설정 (Railway는 process.env.PORT 를 자동으로 지정해 줍니다)
 const PORT = process.env.PORT || 3000;
 // 빌드된 정적 파일이 있는 폴더 경로
-const DIST = path.join(__dirname, 'dist');
+const DIST = path.join(__dirname, 'public');
 
 const MIME = {
   '.html': 'text/html',
