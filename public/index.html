@@ -128,19 +128,35 @@
         </table>
       </div>
     </div>
+    <div style="text-align:center; margin-top:0.5rem;">
+      <label>
+      
+      <input type="checkbox" class="shuffle-checkbox" checked>
+      문제 섞기
+    </label>
+    </div> 
     <div style="text-align:center; margin-top:1rem;">
       <button class="primary" onclick="resetEdit()">초기화</button>
       <button class="primary" id="start-btn" onclick="startQuiz()">문제 풀기</button>
       <button class="primary" id="share-btn">문제 공유</button>
+
     </div>
+
   </div>
 
+</div>
   <!-- 풀이 화면 -->
   <div id="solve-screen" class="hidden">
     <div style="text-align:center; margin-bottom:1rem;">
       <button class="primary" onclick="goEdit()">문제 수정하기</button>
     </div>
     <div id="quiz-area"></div>
+    <div style="text-align:center; margin-top:0.5rem;">
+      <label>
+        <input type="checkbox" class="shuffle-checkbox" checked>
+        문제 섞기
+      </label>
+    </div>
     <div id="quiz-actions">
       <button class="primary" onclick="grade()">제출</button>
       <button class="primary" onclick="retryWrong()">틀린문제 다시풀기</button>
@@ -153,52 +169,66 @@
 <section id="about-program" style="margin-top:2rem; padding:1.5rem; background:#ffffff; border:1px solid #e5e7eb; border-radius:0.5rem; font-size:0.95rem; line-height:1.6;">
   <h2 style="margin-bottom:0.75rem; color:#4f46e5; font-weight:600;">퀴즈 생성기 사용 안내</h2>
   <p>
-    이 퀴즈 생성기는 <strong>일괄 입력 ↔ 개별 편집</strong>이 좌우로 연동되어,<br>  
+    이 퀴즈 생성기는 <strong>일괄 입력 ↔ 개별 편집</strong>이 좌우로 연동되며,<br>
     <code>문제 / 답1 / 답2 / 답3</code> 형식의 텍스트를 입력하면 자동으로 테이블에 반영됩니다.<br>
     복수정답 처리는 답과 답 사이에 <code>,</code>를 넣어주면 됩니다.
   </p>
+
+  <h3 style="margin:1rem 0 0.5rem;">핵심 기능</h3>
+  <ul style="padding-left:1.2rem; list-style:disc;">
+    <li><strong>초기화</strong>: "초기화" 버튼으로 모든 입력을 초기 상태로 되돌립니다.</li>
+    <li><strong>문제 섞기</strong>: "문제 섞기" 체크박스로 퀴즈 문제의 순서를 랜덤 또는 순차로 선택합니다.</li>
+    <li><strong>문제 공유</strong>: "문제 공유" 버튼 클릭 시 현재 문제 세트의 URL이 자동으로 클립보드에 복사됩니다.</li>
+    <li><strong>채점 옵션</strong>: 공백·특수문자( . ! , ? ; : )를 무시하고, 알파벳 대소문자를 구분 없이 채점합니다.</li>
+    <li><strong>부분 일치</strong>: 답 문자열이 8자 이상일 경우 60% 이상 일치해도 정답으로 인정합니다.</li>
+    <li><strong>재풀이 기능</strong>: "틀린 문제 다시풀기"와 "전체 다시풀기" 버튼으로 오답 학습을 지원합니다.</li>
+  </ul>
+
   <h3 style="margin:1rem 0 0.5rem;">어디에 쓸 수 있나요?</h3>
   <ul style="padding-left:1.2rem; list-style:disc;">
     <li>학습 플랫폼: 교사용 자료 제작, 학생 셀프 테스트</li>
     <li>스터디 그룹: 토론 주제 배포 전 간단한 선테스트</li>
     <li>온라인 강의: 슬라이드에 바로 붙여넣어 실시간 퀴즈</li>
     <li>개인 복습: 출퇴근길·여행 중 모바일 학습</li>
-    <li>자료 정리 및 개념 요약: 노트 대용이나 학습 컨텐츠 정리 도구로 활용</li>
+    <li>자료 정리 및 개념 요약: 노트 대용이나 학습 콘텐츠 정리 도구로 활용</li>
   </ul>
+
   <h3 style="margin:1rem 0 0.5rem;">어떻게 사용하나요?</h3>
   <ol style="padding-left:1.2rem; list-style:decimal;">
     <li>
-      <strong>문제 편집 화면</strong>에서  
-      <code>문제 텍스트 / 답1 / 답2 / 답3</code> 를 엔터로 구분하여 입력하세요.  <br>
-      복수정답은 <code>,</code>로 구분합니다.
-      <br>
-
-      빈 칸은 자동으로 제거되며 최대 3칸까지 지원합니다.
-
+      <strong>문제 편집 화면</strong>에서<br>
+      <code>문제 텍스트 / 답1 / 답2 / 답3</code>를 엔터로 구분하여 입력하세요.<br>
+      복수정답은 <code>,</code>로 구분하며, 최대 3개의 답을 지원합니다.
     </li>
     <li>
-      오른쪽 테이블에서 개별 행을 직접 수정할 수도 있습니다.  
+      오른쪽 테이블에서 개별 행을 직접 수정할 수도 있습니다.<br>
       수정 즉시 왼쪽 입력창에 동기화됩니다.
     </li>
     <li>
       <strong>“문제 풀기”</strong> 버튼을 누르면 퀴즈 모드로 전환됩니다.
     </li>
     <li>
-      퀴즈 화면에서는 <em>제출, 전체 재풀이, 틀린 문제만 재풀이</em> 기능을 제공합니다.  
+      퀴즈 화면에서는 <em>제출, 전체 재풀이, 틀린 문제만 재풀이</em> 기능을 제공합니다.<br>
       오답 시에는 올바른 답을 함께 확인할 수 있습니다.
     </li>
+    <li>
+      <strong>“문제 섞기”</strong> 체크박스로 문제 섞기 여부를 선택할 수 있습니다.
+    </li>
+    <li>
+      <strong>“문제 공유”</strong> 버튼으로 현재 문제 세트의 링크를 클립보드에 복사할 수 있습니다.
+    </li>
   </ol>
-  <p style="color:#6b7280; font-size:0.85rem; margin-top:1rem;">
-    * 이 퀴즈 생성기는 족보 풀이 이외 모든 과목·주제에 활용 가능하며,  
-    학습 내용을 체계적으로 정리·요약하는 툴로도 사용할 수 있습니다.
 
+  <p style="color:#6b7280; font-size:0.85rem; margin-top:1rem;">
+    * 이 퀴즈 생성기는 족보 풀이뿐만 아니라 모든 과목·주제에 활용 가능하며,<br>
+    학습 내용을 체계적으로 정리·요약하는 도구로도 사용할 수 있습니다.
   </p>
   <p style="color:#6b7280; font-size:0.75rem; margin-top:1rem;">
     made for mun
   </p>
 </section>
-
 <!-- 프로그램 설명 끝 -->
+
 
  
 <script>
@@ -212,6 +242,18 @@
     }
     return a;
   }
+  function isShuffleEnabled() {
+  return document.querySelector('.shuffle-checkbox').checked;
+}
+
+  function normalize(str) {
+  return str
+    .replace(/[\s\.\!\,\?\;\:]/g, '') // 공백과 마침표·느낌표·쉼표·물음표·세미콜론·콜론 제거
+    .toLowerCase();
+}
+
+
+
 
   const input = document.getElementById("bulk-input");
   const tableBody = document.querySelector("#question-table tbody");
@@ -437,13 +479,17 @@ function resetEdit() {
   // --- 아래부터 기존 startQuiz / grade / retryAll / retryWrong / goEdit ---
 
   function startQuiz() {
-    questions = parseInput(input.value);
+  questions = parseInput(input.value);
+  if (isShuffleEnabled()) {
     currentQs = shuffle(questions);
-    renderQuiz();
-    document.getElementById("edit-screen").classList.add("hidden");
-    document.getElementById("solve-screen").classList.remove("hidden");
-    document.getElementById("result").innerHTML = "";
+  } else {
+    currentQs = questions.slice();  // 원래 순서 복사
   }
+  renderQuiz();
+  document.getElementById("edit-screen").classList.add("hidden");
+  document.getElementById("solve-screen").classList.remove("hidden");
+  document.getElementById("result").innerHTML = "";
+}
 
   function renderQuiz() {
     const quizArea = document.getElementById("quiz-area");
@@ -463,67 +509,89 @@ function resetEdit() {
     });
   }
 
-  function grade() {
-    // 1) 빈칸 체크
-    for (let i = 0; i < currentQs.length; i++) {
-      const item = currentQs[i];
-      for (let j = 0; j < item.a.length; j++) {
-        if (item.a[j].length > 0) {
-          const inp = document.getElementById(`ans-${i}-${j}`);
+  // 2) grade() 함수 내 채점 로직 교체
+function grade() {
+  let score = 0;
 
-        }
-      }
-    }
-
-    // 2) 실제 채점 & 정답 표시
-    let score = 0;
   currentQs.forEach((item, i) => {
     let ok = true;
+
     item.a.forEach((set, j) => {
       if (set.length > 0) {
-        const user = document.getElementById(`ans-${i}-${j}`).value.trim().toLowerCase();
-        const corrects = set.map(s => s.toLowerCase());
-        if (!corrects.includes(user)) ok = false;
+        const userRaw = document.getElementById(`ans-${i}-${j}`).value;
+        const user = normalize(userRaw);
+
+        // 정답 후보들 중 하나라도 매칭되면 통과
+        const matched = set.some(correctRaw => {
+          const correct = normalize(correctRaw);
+
+          if (correct.length >= 8) {
+            // 8자 이상: 60% 이상 문자 위치 일치 허용
+            let matchCount = 0;
+            const minLen = Math.min(user.length, correct.length);
+
+            // 간단하게 **위치 기준**으로 일치 문자 개수 세기
+            for (let k = 0; k < minLen; k++) {
+              if (user[k] === correct[k]) matchCount++;
+            }
+            const ratio = matchCount / correct.length;
+            return ratio >= 0.6;
+          } else {
+            // 짧은 답은 완전 일치만
+            return user === correct;
+          }
+        });
+
+        if (!matched) ok = false;
       }
     });
+
     const fb = document.getElementById(`fb-${i}`);
     if (ok) {
       fb.textContent = "정답입니다!";
       fb.className = "correct";
       score++;
     } else {
-      // 빈 배열인 answer set은 걸러내고, 나머지만 ' / ' 로 합칩니다
       const answers = item.a
         .map(set => set.join(", "))
-        .filter(text => text.trim() !== "")
+        .filter(text => text.trim())
         .join(" / ");
       fb.textContent = `오답입니다. 정답: ${answers}`;
       fb.className = "wrong";
     }
   });
 
-  // 결과 표시
   document.getElementById("result").textContent =
     `총 ${currentQs.length}문제 중 ${score}문제 정답 (${Math.round(score / currentQs.length * 100)}%)`;
 }
 
-  function retryWrong() {
-    const wrongs = [];
-    currentQs.forEach((item, idx) => {
-      const fb = document.getElementById(`fb-${idx}`);
-      if (fb.classList.contains("wrong")) wrongs.push(item);
-    });
-    if (!wrongs.length) return alert("틀린 문제가 없습니다.");
-    currentQs = shuffle(wrongs);
-    renderQuiz();
-    document.getElementById("result").innerHTML = "";
-  }
+function retryWrong() {
+  const wrongs = [];
+  currentQs.forEach((item, idx) => {
+    const fb = document.getElementById(`fb-${idx}`);
+    if (fb.classList.contains("wrong")) wrongs.push(item);
+  });
+  if (!wrongs.length) return alert("틀린 문제가 없습니다.");
 
-  function retryAll() {
-    currentQs = shuffle(questions);
-    renderQuiz();
-    document.getElementById("result").innerHTML = "";
+  if (isShuffleEnabled()) {
+    currentQs = shuffle(wrongs);
+  } else {
+    currentQs = wrongs.slice();
   }
+  renderQuiz();
+  document.getElementById("result").innerHTML = "";
+}
+
+
+function retryAll() {
+  if (isShuffleEnabled()) {
+    currentQs = shuffle(questions);
+  } else {
+    currentQs = questions.slice();
+  }
+  renderQuiz();
+  document.getElementById("result").innerHTML = "";
+}
 
   function goEdit() {
     document.getElementById("solve-screen").classList.add("hidden");
