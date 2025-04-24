@@ -3,8 +3,10 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "start": "serve -s . -l 3000"
-    },
+        "build": "echo \"skip build\"",
+    
+        "start": "node server.js"
+      },
     "dependencies": {
         "serve": "^14.2.4"
     }
