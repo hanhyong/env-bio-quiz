@@ -3,9 +3,11 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-    "build": "npm run build",     
-    "start": "serve -s dist -l 3000"
-    },
+        "dev": "vite",
+        "build": "vite build",
+        "serve": "vite preview",  
+        "start": "serve -s dist -l 3000"
+      },
     "dependencies": {
         "express": "^4.18.2"
     },
